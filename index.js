@@ -6,13 +6,21 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 
-app.get("/api/:endpoint", async (req, res) => {
+app.get("/api/*", async (req, res) => {
+  // req.params[0] содержит всю часть URL после /api/
+  const endpoint = req.params[0];
+  const apiUrl = `https://api.football-data.org/v4/${endpoint}`;
+
   try {
-    const response = await axios.get(`https://api.football-data.org/v4/${req.params.endpoint}`, {
+    console.log(`Запрос к API: ${apiUrl}`);
+
+    const response = await axios.get(apiUrl, {
       headers: { "X-Auth-Token": process.env.API_KEY }
     });
+
     res.json(response.data);
   } catch (error) {
+    console.error("Ошибка запроса:", error.response?.status, error.response?.data);
     res.status(error.response?.status || 500).json({ error: "Ошибка сервера" });
   }
 });
